@@ -41,9 +41,8 @@ const ChatMessage = memo(function ChatMessage({ msg }: { msg: Message }) {
       className={`flex gap-2.5 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
       style={{ opacity: 1 }}
     >
-      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-        msg.role === "user" ? "bg-blue-500/20 text-blue-400" : "bg-indigo-500/20 text-indigo-400"
-      }`}>
+      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-500/20 text-blue-400" : "bg-indigo-500/20 text-indigo-400"
+        }`}>
         {msg.role === "user" ? (msg.isVoice ? <Mic size={12} /> : <User size={12} />) : <Bot size={12} />}
       </div>
       <div className="max-w-[75%]">
@@ -54,11 +53,10 @@ const ChatMessage = memo(function ChatMessage({ msg }: { msg: Message }) {
             </span>
           </div>
         )}
-        <div className={`rounded-xl px-3.5 py-2 text-[13px] leading-relaxed ${
-          msg.role === "user"
+        <div className={`rounded-xl px-3.5 py-2 text-[13px] leading-relaxed ${msg.role === "user"
             ? "bg-blue-600 text-white rounded-tr-none"
             : "bg-slate-800/80 text-slate-200 border border-slate-700/50 rounded-tl-none"
-        }`}>
+          }`}>
           <p className="whitespace-pre-wrap">{msg.text}</p>
         </div>
         {msg.timestamp && (
@@ -152,7 +150,7 @@ export default function InterviewPage() {
     location: "Hybrid"
   });
   const [selectedCodingLanguage, setSelectedCodingLanguage] = useState<CodingLanguage>("javascript");
-  
+
   // These will be properly initialized in the useEffect when role is fetched
   const [activeQuestions, setActiveQuestions] = useState<typeof CODING_QUESTIONS>([]);
   const [activeQuestionIds, setActiveQuestionIds] = useState<string[]>([]);
@@ -209,7 +207,7 @@ export default function InterviewPage() {
   const answerTimerRef = useRef<number | null>(null);
   const micRecognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const micTranscriptRef = useRef<string>("");
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -561,7 +559,7 @@ export default function InterviewPage() {
         if (isSubmit) {
           const passedCount = Number(payload.passedCount ?? 0);
           const totalCount = Number(payload.totalCount ?? 0);
-          
+
           setCodingSubmissions((prev) => [
             ...prev,
             {
@@ -581,7 +579,7 @@ export default function InterviewPage() {
             const nextIndex = currentCodingQuestionIndex + 1;
             setCurrentCodingQuestionIndex(nextIndex);
             const nextQ = activeQuestions[nextIndex];
-            setCodingCode(nextQ.starterByLanguage[selectedCodingLanguage]);
+            setCodingCode(nextQ.starterByLanguage[selectedCodingLanguage] ?? "");
             setRunInput(selectedCodingLanguage === "sql" ? "" : (nextQ.tests[0]?.input ?? ""));
             setRunOutput("");
             setCodingResults(null);
@@ -629,10 +627,10 @@ export default function InterviewPage() {
           throw new Error(payload.error || "Auto-submit failed.");
         }
         setCodingResults(payload.testResults || []);
-        
+
         const passedCount = Number(payload.passedCount ?? 0);
         const totalCount = Number(payload.totalCount ?? 0);
-        
+
         setCodingSubmissions((prev) => [
           ...prev,
           {
@@ -715,7 +713,7 @@ export default function InterviewPage() {
             questionId: currentCodingQuestion.id,
           }),
           keepalive: true,
-        }).catch(() => {});
+        }).catch(() => { });
         e.preventDefault();
         e.returnValue = "";
       }
@@ -1018,7 +1016,7 @@ export default function InterviewPage() {
 
   const handleSendMessage = useCallback(async (customInput?: string, isInitial: boolean = false, hasVideo: boolean = false, isVoice: boolean = false) => {
     const textToSend = isInitial ? "START_INTERVIEW" : (customInput ?? "");
-    
+
     if (!textToSend.trim()) return;
 
     // Stop answer timer when user submits
@@ -1177,24 +1175,24 @@ export default function InterviewPage() {
       try {
         const res = await fetch(`/api/interview/chat?sessionId=${sessionId}`);
         if (!res.ok) throw new Error("Failed to load session");
-        
+
         const data = await res.json();
         setInterviewStatus(data.status);
-        
+
         const role = data.role || "GENERAL";
         setRoleTemplate(role);
         const roleQuestions = CODING_QUESTIONS_BY_ROLE[role] || CODING_QUESTIONS_BY_ROLE["GENERAL"];
-        
+
         const selectedQuestions = roleQuestions.slice(0, 3);
         setActiveQuestions(selectedQuestions);
         setActiveQuestionIds(selectedQuestions.map(q => q.id));
         setQuestionCompletion(selectedQuestions.map(() => false));
-        
+
         const defaultLang = role === "DATABASE" ? "sql" : role === "FRONTEND" ? "javascript" : "python";
         setSelectedCodingLanguage(defaultLang);
         setCodingCode(selectedQuestions[0]?.starterByLanguage[defaultLang] || "");
         setRunInput(defaultLang === "sql" ? "" : selectedQuestions[0]?.tests[0]?.input || "");
-        
+
         if (data.transcript && data.transcript.length > 0) {
           setMessages(
             data.transcript.map((msg: { role: "user" | "model"; text: string }) => ({
@@ -1217,7 +1215,7 @@ export default function InterviewPage() {
   useEffect(() => {
     if (!codingRoundCompleted) return;
     if (document.fullscreenElement && document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {});
+      document.exitFullscreen().catch(() => { });
     }
     if (autoSubmitReason) {
       fetch("/api/interview/cancel", {
@@ -1225,7 +1223,7 @@ export default function InterviewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, reason: autoSubmitReason }),
         keepalive: true,
-      }).catch(() => {});
+      }).catch(() => { });
       return;
     }
     if (messages.length === 0) {
@@ -1240,14 +1238,14 @@ export default function InterviewPage() {
   const submitCultureAndCompleteInterview = async (cultureData: any) => {
     setLoading(true);
     try {
-      const codingScore = codingRoundSummary && codingRoundSummary.totalTests > 0 
-        ? (codingRoundSummary.totalPassed / codingRoundSummary.totalTests) * 100 
+      const codingScore = codingRoundSummary && codingRoundSummary.totalTests > 0
+        ? (codingRoundSummary.totalPassed / codingRoundSummary.totalTests) * 100
         : 0;
 
       await fetch("/api/interview/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           sessionId,
           codingScore,
           codingSubmissions,
@@ -1476,9 +1474,9 @@ export default function InterviewPage() {
                   {CODING_LANGUAGES.map((lang) => {
                     const isDataRole = roleTemplate === "DATA" || roleTemplate === "AI_ML";
                     const isDbRole = roleTemplate === "DATABASE";
-                    const isDisabled = 
-                      (isDataRole && lang.id !== "python") || 
-                      (isDbRole && lang.id !== "sql") || 
+                    const isDisabled =
+                      (isDataRole && lang.id !== "python") ||
+                      (isDbRole && lang.id !== "sql") ||
                       (!isDbRole && lang.id === "sql");
                     return (
                       <button
@@ -1487,16 +1485,15 @@ export default function InterviewPage() {
                         onClick={() => {
                           setSelectedCodingLanguage(lang.id);
                           if (activeQuestions.length > 0) {
-                            setCodingCode(activeQuestions[0].starterByLanguage[lang.id]);
+                            setCodingCode(activeQuestions[0].starterByLanguage[lang.id] ?? "");
                           }
                         }}
-                        className={`rounded-lg border px-3 py-2 text-sm text-left ${
-                          selectedCodingLanguage === lang.id
+                        className={`rounded-lg border px-3 py-2 text-sm text-left ${selectedCodingLanguage === lang.id
                             ? "bg-indigo-500/20 border-indigo-400 text-white"
                             : isDisabled
-                            ? "bg-slate-900/20 border-slate-800 text-slate-600 cursor-not-allowed"
-                            : "bg-slate-950/50 border-slate-700 text-slate-300"
-                        }`}
+                              ? "bg-slate-900/20 border-slate-800 text-slate-600 cursor-not-allowed"
+                              : "bg-slate-950/50 border-slate-700 text-slate-300"
+                          }`}
                       >
                         {lang.label} {isDisabled && "(Not Allowed)"}
                       </button>
@@ -1514,7 +1511,7 @@ export default function InterviewPage() {
                     setCurrentCodingQuestionIndex(0);
                     setQuestionCompletion(activeQuestions.map(() => false));
                     const q0 = activeQuestions[0];
-                    setCodingCode(q0.starterByLanguage[selectedCodingLanguage]);
+                    setCodingCode(q0.starterByLanguage[selectedCodingLanguage] ?? "");
                     setRunInput(selectedCodingLanguage === "sql" ? "" : (q0.tests[0]?.input ?? ""));
                     setShowCodingCaution(true);
                   }}
@@ -1580,217 +1577,216 @@ export default function InterviewPage() {
               </div>
             )}
             {!showCodingCaution && codingRoundStarted && (
-            <div className="h-full w-full bg-white/5 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
-              <div className="shrink-0 px-4 py-3 border-b border-white/10 flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <h2 className="text-lg font-semibold truncate">
-                    Q{currentCodingQuestionIndex + 1}: {currentCodingQuestion.title}
-                  </h2>
-                  <p className="text-xs text-slate-400 truncate">
-                    {currentCodingQuestion.difficulty} - {currentCodingQuestion.source} - {CODING_LANGUAGES.find((l) => l.id === selectedCodingLanguage)?.label}
-                  </p>
-                </div>
-                <div className="px-3 py-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium inline-flex items-center gap-2 shrink-0">
-                  <Clock size={16} />
-                  Time Left: {formatCodingTime(codingTimeLeft)}
-                </div>
-              </div>
-
-              <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-5 gap-3 p-3">
-                {/* Left: Problem statement */}
-                <div className="min-h-0 xl:col-span-2 bg-slate-900/50 border border-white/10 rounded-xl p-3 overflow-auto">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-medium text-slate-200">Problem</p>
-                    <span className="text-[11px] text-slate-400">{currentCodingQuestion.difficulty}</span>
-                  </div>
-                  <p className="text-sm text-white font-semibold mt-1">{currentCodingQuestion.title}</p>
-                  <p className="text-[11px] text-slate-400 mt-1">{currentCodingQuestion.source}</p>
-
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-300 font-medium mb-1">Description</p>
-                    <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
-                      {currentCodingQuestion.description}
+              <div className="h-full w-full bg-white/5 border border-white/10 rounded-2xl flex flex-col overflow-hidden">
+                <div className="shrink-0 px-4 py-3 border-b border-white/10 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-semibold truncate">
+                      Q{currentCodingQuestionIndex + 1}: {currentCodingQuestion.title}
+                    </h2>
+                    <p className="text-xs text-slate-400 truncate">
+                      {currentCodingQuestion.difficulty} - {currentCodingQuestion.source} - {CODING_LANGUAGES.find((l) => l.id === selectedCodingLanguage)?.label}
                     </p>
                   </div>
-
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-300 font-medium mb-1">Input Format</p>
-                    <pre className="text-[11px] bg-black/30 border border-slate-700 rounded-lg p-2 text-slate-200 whitespace-pre-wrap">
-                      {currentCodingQuestion.inputFormat}
-                    </pre>
+                  <div className="px-3 py-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium inline-flex items-center gap-2 shrink-0">
+                    <Clock size={16} />
+                    Time Left: {formatCodingTime(codingTimeLeft)}
                   </div>
+                </div>
 
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-300 font-medium mb-1">Output Format</p>
-                    <pre className="text-[11px] bg-black/30 border border-slate-700 rounded-lg p-2 text-slate-200 whitespace-pre-wrap">
-                      {currentCodingQuestion.outputFormat}
-                    </pre>
-                  </div>
-
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-300 font-medium mb-1">Constraints</p>
-                    <ul className="space-y-1">
-                      {currentCodingQuestion.constraints.map((c) => (
-                        <li key={c} className="text-[11px] text-slate-300">
-                          - {c}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-3">
-                    <p className="text-xs text-slate-300 font-medium mb-2">Examples</p>
-                    <div className="space-y-3">
-                      {currentCodingQuestion.examples.map((ex, idx) => (
-                        <div key={idx} className="bg-black/30 border border-slate-700 rounded-lg p-2">
-                          <p className="text-[11px] text-slate-400 mb-2">Example {idx + 1}</p>
-                          <p className="text-[11px] text-slate-300 mb-1">Input</p>
-                          <pre className="text-[11px] text-slate-100 whitespace-pre-wrap">{ex.input}</pre>
-                          <p className="text-[11px] text-slate-300 mt-2 mb-1">Output</p>
-                          <pre className="text-[11px] text-slate-100 whitespace-pre-wrap">{ex.output}</pre>
-                          <p className="text-[11px] text-slate-300 mt-2 mb-1">Explanation</p>
-                          <p className="text-[11px] text-slate-300 whitespace-pre-wrap">{ex.explanation}</p>
-                        </div>
-                      ))}
+                <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-5 gap-3 p-3">
+                  {/* Left: Problem statement */}
+                  <div className="min-h-0 xl:col-span-2 bg-slate-900/50 border border-white/10 rounded-xl p-3 overflow-auto">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs font-medium text-slate-200">Problem</p>
+                      <span className="text-[11px] text-slate-400">{currentCodingQuestion.difficulty}</span>
                     </div>
-                  </div>
-                </div>
+                    <p className="text-sm text-white font-semibold mt-1">{currentCodingQuestion.title}</p>
+                    <p className="text-[11px] text-slate-400 mt-1">{currentCodingQuestion.source}</p>
 
-                {/* Middle: Editor */}
-                <div className="min-h-0 xl:col-span-2 bg-slate-950 border border-slate-700 rounded-xl p-3 flex flex-col">
-                  <p className="text-xs text-slate-400 mb-2">
-                    Compiler ({CODING_LANGUAGES.find((l) => l.id === selectedCodingLanguage)?.label})
-                  </p>
-                  <div className="flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-700">
-                    <MonacoEditor
-                      height="100%"
-                      language={monacoLanguage}
-                      value={codingCode}
-                      onChange={(value) => setCodingCode(value ?? "")}
-                      theme="vs-dark"
-                      options={{
-                        readOnly: codingTimeLeft === 0 || codingSubmitLoading,
-                        minimap: { enabled: false },
-                        fontSize: 14,
-                        lineNumbers: "on",
-                        wordWrap: "on",
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        tabSize: 2,
-                        contextmenu: false,
-                        copyWithSyntaxHighlighting: false,
-                        bracketPairColorization: { enabled: true },
-                      }}
-                    />
-                  </div>
-                </div>
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-300 font-medium mb-1">Description</p>
+                      <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                        {currentCodingQuestion.description}
+                      </p>
+                    </div>
 
-                {/* Right: run/output/actions */}
-                <div className="min-h-0 xl:col-span-1 bg-slate-900/50 border border-white/10 rounded-xl p-3 flex flex-col gap-3 overflow-hidden">
-                  <div className="shrink-0">
-                    <p className="text-xs text-slate-400 mb-1">Run Input (stdin)</p>
-                    <textarea
-                      value={runInput}
-                      onChange={(e) => setRunInput(e.target.value)}
-                      disabled={codingSubmitLoading}
-                      onPaste={(e) => {
-                        e.preventDefault();
-                        registerCheatSignal("Paste blocked in custom input.");
-                      }}
-                      className="w-full h-28 bg-black/40 border border-slate-700 rounded-lg p-2 font-mono text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-                    />
-                    <p className="text-[11px] text-slate-500 mt-2">
-                      Example input from tests: {currentCodingQuestion.tests[0]?.input.replace(/\n/g, " | ")}
-                    </p>
-                  </div>
-
-                  <div className="shrink-0 flex flex-col gap-2">
-                    <button
-                      onClick={runCode}
-                      disabled={runLoading || codingSubmitLoading || codingTimeLeft === 0 || isAutoSubmitting}
-                      className="w-full px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-800 text-white text-xs"
-                    >
-                      {runLoading ? "Running Code..." : "Run Code"}
-                    </button>
-                    <button
-                      onClick={() => evaluateCoding(false)}
-                      disabled={codingRunLoading || runLoading || codingSubmitLoading || codingTimeLeft === 0 || isAutoSubmitting}
-                      className="w-full px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 text-white text-xs"
-                    >
-                      {codingRunLoading ? "Running..." : "Run Test Cases"}
-                    </button>
-                    <button
-                      onClick={() => evaluateCoding(true)}
-                      disabled={codingRunLoading || runLoading || codingSubmitLoading || isAutoSubmitting}
-                      className="w-full px-3 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-800 text-white text-xs"
-                    >
-                      {codingSubmitLoading
-                        ? "Submitting..."
-                        : currentCodingQuestionIndex < activeQuestions.length - 1
-                          ? "Submit & Next Question"
-                          : "Submit Coding Round"}
-                    </button>
-                  </div>
-
-                  <div className="min-h-0 flex-1 overflow-auto space-y-3">
-                    <div>
-                      <p className="text-xs text-slate-400 mb-1">Output</p>
-                      <pre className="w-full h-24 bg-black/40 border border-slate-700 rounded-lg p-2 font-mono text-xs text-slate-100 whitespace-pre-wrap overflow-auto">
-                        {runOutput || "Run your code to see output..."}
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-300 font-medium mb-1">Input Format</p>
+                      <pre className="text-[11px] bg-black/30 border border-slate-700 rounded-lg p-2 text-slate-200 whitespace-pre-wrap">
+                        {currentCodingQuestion.inputFormat}
                       </pre>
                     </div>
 
-                    <div className="bg-slate-950/60 border border-white/10 rounded-lg p-2">
-                      <p className="text-xs text-slate-400 mb-1">Anti-Cheat</p>
-                      <p className="text-[11px] text-slate-300">Fullscreen: {isFullscreenActive ? "Active" : "Inactive"}</p>
-                      <p className={`text-[11px] ${cheatWarnings > 0 ? "text-amber-300" : "text-green-300"}`}>
-                        Warnings: {cheatWarnings}/{MAX_CHEAT_WARNINGS}
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-300 font-medium mb-1">Output Format</p>
+                      <pre className="text-[11px] bg-black/30 border border-slate-700 rounded-lg p-2 text-slate-200 whitespace-pre-wrap">
+                        {currentCodingQuestion.outputFormat}
+                      </pre>
+                    </div>
+
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-300 font-medium mb-1">Constraints</p>
+                      <ul className="space-y-1">
+                        {currentCodingQuestion.constraints.map((c) => (
+                          <li key={c} className="text-[11px] text-slate-300">
+                            - {c}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mt-3">
+                      <p className="text-xs text-slate-300 font-medium mb-2">Examples</p>
+                      <div className="space-y-3">
+                        {currentCodingQuestion.examples.map((ex, idx) => (
+                          <div key={idx} className="bg-black/30 border border-slate-700 rounded-lg p-2">
+                            <p className="text-[11px] text-slate-400 mb-2">Example {idx + 1}</p>
+                            <p className="text-[11px] text-slate-300 mb-1">Input</p>
+                            <pre className="text-[11px] text-slate-100 whitespace-pre-wrap">{ex.input}</pre>
+                            <p className="text-[11px] text-slate-300 mt-2 mb-1">Output</p>
+                            <pre className="text-[11px] text-slate-100 whitespace-pre-wrap">{ex.output}</pre>
+                            <p className="text-[11px] text-slate-300 mt-2 mb-1">Explanation</p>
+                            <p className="text-[11px] text-slate-300 whitespace-pre-wrap">{ex.explanation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle: Editor */}
+                  <div className="min-h-0 xl:col-span-2 bg-slate-950 border border-slate-700 rounded-xl p-3 flex flex-col">
+                    <p className="text-xs text-slate-400 mb-2">
+                      Compiler ({CODING_LANGUAGES.find((l) => l.id === selectedCodingLanguage)?.label})
+                    </p>
+                    <div className="flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-700">
+                      <MonacoEditor
+                        height="100%"
+                        language={monacoLanguage}
+                        value={codingCode}
+                        onChange={(value) => setCodingCode(value ?? "")}
+                        theme="vs-dark"
+                        options={{
+                          readOnly: codingTimeLeft === 0 || codingSubmitLoading,
+                          minimap: { enabled: false },
+                          fontSize: 14,
+                          lineNumbers: "on",
+                          wordWrap: "on",
+                          scrollBeyondLastLine: false,
+                          automaticLayout: true,
+                          tabSize: 2,
+                          contextmenu: false,
+                          copyWithSyntaxHighlighting: false,
+                          bracketPairColorization: { enabled: true },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right: run/output/actions */}
+                  <div className="min-h-0 xl:col-span-1 bg-slate-900/50 border border-white/10 rounded-xl p-3 flex flex-col gap-3 overflow-hidden">
+                    <div className="shrink-0">
+                      <p className="text-xs text-slate-400 mb-1">Run Input (stdin)</p>
+                      <textarea
+                        value={runInput}
+                        onChange={(e) => setRunInput(e.target.value)}
+                        disabled={codingSubmitLoading}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          registerCheatSignal("Paste blocked in custom input.");
+                        }}
+                        className="w-full h-28 bg-black/40 border border-slate-700 rounded-lg p-2 font-mono text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                      />
+                      <p className="text-[11px] text-slate-500 mt-2">
+                        Example input from tests: {currentCodingQuestion.tests[0]?.input.replace(/\n/g, " | ")}
                       </p>
-                      {isAutoSubmitting && <p className="text-[11px] text-red-300">Auto-submitting...</p>}
-                      {antiCheatLogs.length > 0 && (
-                        <div className="mt-1 space-y-1">
-                          {antiCheatLogs.slice(0, 3).map((log, idx) => (
-                            <p key={`${log}-${idx}`} className="text-[11px] text-slate-400">{log}</p>
-                          ))}
+                    </div>
+
+                    <div className="shrink-0 flex flex-col gap-2">
+                      <button
+                        onClick={runCode}
+                        disabled={runLoading || codingSubmitLoading || codingTimeLeft === 0 || isAutoSubmitting}
+                        className="w-full px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-800 text-white text-xs"
+                      >
+                        {runLoading ? "Running Code..." : "Run Code"}
+                      </button>
+                      <button
+                        onClick={() => evaluateCoding(false)}
+                        disabled={codingRunLoading || runLoading || codingSubmitLoading || codingTimeLeft === 0 || isAutoSubmitting}
+                        className="w-full px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 text-white text-xs"
+                      >
+                        {codingRunLoading ? "Running..." : "Run Test Cases"}
+                      </button>
+                      <button
+                        onClick={() => evaluateCoding(true)}
+                        disabled={codingRunLoading || runLoading || codingSubmitLoading || isAutoSubmitting}
+                        className="w-full px-3 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-800 text-white text-xs"
+                      >
+                        {codingSubmitLoading
+                          ? "Submitting..."
+                          : currentCodingQuestionIndex < activeQuestions.length - 1
+                            ? "Submit & Next Question"
+                            : "Submit Coding Round"}
+                      </button>
+                    </div>
+
+                    <div className="min-h-0 flex-1 overflow-auto space-y-3">
+                      <div>
+                        <p className="text-xs text-slate-400 mb-1">Output</p>
+                        <pre className="w-full h-24 bg-black/40 border border-slate-700 rounded-lg p-2 font-mono text-xs text-slate-100 whitespace-pre-wrap overflow-auto">
+                          {runOutput || "Run your code to see output..."}
+                        </pre>
+                      </div>
+
+                      <div className="bg-slate-950/60 border border-white/10 rounded-lg p-2">
+                        <p className="text-xs text-slate-400 mb-1">Anti-Cheat</p>
+                        <p className="text-[11px] text-slate-300">Fullscreen: {isFullscreenActive ? "Active" : "Inactive"}</p>
+                        <p className={`text-[11px] ${cheatWarnings > 0 ? "text-amber-300" : "text-green-300"}`}>
+                          Warnings: {cheatWarnings}/{MAX_CHEAT_WARNINGS}
+                        </p>
+                        {isAutoSubmitting && <p className="text-[11px] text-red-300">Auto-submitting...</p>}
+                        {antiCheatLogs.length > 0 && (
+                          <div className="mt-1 space-y-1">
+                            {antiCheatLogs.slice(0, 3).map((log, idx) => (
+                              <p key={`${log}-${idx}`} className="text-[11px] text-slate-400">{log}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {codingError && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2 text-xs text-red-300">
+                          {codingError}
+                        </div>
+                      )}
+
+                      {codingResults && (
+                        <div className="bg-slate-950/60 border border-white/10 rounded-lg p-2">
+                          <p className="text-xs text-slate-300 mb-1">Test Results</p>
+                          <div className="space-y-1">
+                            {codingResults.map((result) => (
+                              <p
+                                key={result.index}
+                                className={`text-[11px] px-2 py-1 rounded border ${result.passed
+                                    ? "bg-green-500/10 border-green-500/30 text-green-300"
+                                    : "bg-red-500/10 border-red-500/30 text-red-300"
+                                  }`}
+                              >
+                                Test {result.index}: {result.passed ? "Passed" : `Failed${result.error ? ` - ${result.error}` : ""}`}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {codingTimeLeft === 0 && (
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 text-xs text-amber-200">
+                          Time is up. Submit your latest code to continue.
                         </div>
                       )}
                     </div>
-
-                    {codingError && (
-                      <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2 text-xs text-red-300">
-                        {codingError}
-                      </div>
-                    )}
-
-                    {codingResults && (
-                      <div className="bg-slate-950/60 border border-white/10 rounded-lg p-2">
-                        <p className="text-xs text-slate-300 mb-1">Test Results</p>
-                        <div className="space-y-1">
-                          {codingResults.map((result) => (
-                            <p
-                              key={result.index}
-                              className={`text-[11px] px-2 py-1 rounded border ${
-                                result.passed
-                                  ? "bg-green-500/10 border-green-500/30 text-green-300"
-                                  : "bg-red-500/10 border-red-500/30 text-red-300"
-                              }`}
-                            >
-                              Test {result.index}: {result.passed ? "Passed" : `Failed${result.error ? ` - ${result.error}` : ""}`}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {codingTimeLeft === 0 && (
-                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 text-xs text-amber-200">
-                        Time is up. Submit your latest code to continue.
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
-            </div>
             )}
           </div>
         )}
@@ -1834,11 +1830,10 @@ export default function InterviewPage() {
                         <button
                           key={val}
                           onClick={() => setCultureResponses(prev => ({ ...prev, [q.key]: val }))}
-                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                            cultureResponses[q.key as keyof typeof cultureResponses] === val
+                          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${cultureResponses[q.key as keyof typeof cultureResponses] === val
                               ? "bg-indigo-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] scale-110"
                               : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-                          }`}
+                            }`}
                         >
                           {val}
                         </button>
@@ -1897,7 +1892,7 @@ export default function InterviewPage() {
           <p className="text-slate-400 mb-8">
             Thank you for your time. The AI has evaluated your responses and the results have been sent to the recruiter.
           </p>
-          <button 
+          <button
             onClick={() => router.push(`/interview/${sessionId}/feedback`)}
             className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 rounded-xl font-medium transition-colors"
           >
@@ -1925,10 +1920,9 @@ export default function InterviewPage() {
                 const isPast = INTERVIEW_PHASES.findIndex(p => p.id === currentPhase) > INTERVIEW_PHASES.findIndex(p => p.id === phase.id);
                 return (
                   <div key={phase.id} className="flex items-center gap-2.5">
-                    <div className={`w-3 h-3 rounded-full shrink-0 border-2 transition-all ${
-                      isActive ? "bg-indigo-500 border-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.5)]"
+                    <div className={`w-3 h-3 rounded-full shrink-0 border-2 transition-all ${isActive ? "bg-indigo-500 border-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.5)]"
                         : isPast ? "bg-green-500 border-green-400" : "bg-transparent border-slate-600"
-                    }`} />
+                      }`} />
                     <div>
                       <p className={`text-[11px] font-medium ${isActive ? "text-white" : isPast ? "text-green-300" : "text-slate-500"}`}>{phase.label}</p>
                     </div>
@@ -2044,310 +2038,310 @@ export default function InterviewPage() {
           </div>
         </div>
 
-      {/* Video Call Grid */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-3 p-3 min-h-0">
+        {/* Video Call Grid */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-3 p-3 min-h-0">
 
-        {/* Left: AI Recruiter Panel */}
-        <div className="flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden relative"
-          style={{
-            background: "linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.04) 100%)",
-            border: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
-          {/* AI Avatar */}
-          <div className="flex-1 flex items-center justify-center relative overflow-hidden">
-            {/* Ambient glow behind avatar */}
-            <div
-              className="absolute"
-              style={{
-                width: "320px",
-                height: "320px",
-                background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)",
-                pointerEvents: "none",
-              }}
-            />
-            <motion.div
-              animate={(loading || isSpeaking) ? { scale: [1, 1.03, 1] } : { scale: 1 }}
-              transition={(loading || isSpeaking) ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : {}}
-              className="relative z-10"
-            >
+          {/* Left: AI Recruiter Panel */}
+          <div className="flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden relative"
+            style={{
+              background: "linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.04) 100%)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            {/* AI Avatar */}
+            <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+              {/* Ambient glow behind avatar */}
               <div
-                className="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden"
+                className="absolute"
                 style={{
-                  border: (loading || isSpeaking) ? "3px solid rgba(99,102,241,0.6)" : "3px solid rgba(255,255,255,0.1)",
-                  boxShadow: (loading || isSpeaking) ? "0 0 30px rgba(99,102,241,0.3)" : "0 0 20px rgba(0,0,0,0.3)",
-                  transition: "border-color 0.3s, box-shadow 0.3s",
+                  width: "320px",
+                  height: "320px",
+                  background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)",
+                  pointerEvents: "none",
                 }}
-              >
-                <img
-                  src="/ai-recruiter.png"
-                  alt="AI Recruiter"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </motion.div>
-          </div>
-
-          {/* AI label bar */}
-          <div className="shrink-0 px-4 py-2.5 flex items-center justify-between"
-            style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
-          >
-            <div className="flex items-center gap-2">
-              <Bot size={14} className="text-indigo-400" />
-              <span className="text-xs font-medium text-slate-200">Alex (Interviewer)</span>
-            </div>
-            {isThinking && (
-              <span className="text-[10px] text-amber-300 italic animate-pulse">Reviewing your answer...</span>
-            )}
-            {!isThinking && (loading || isSpeaking) && (
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-indigo-300">Speaking</span>
-                <div className="flex items-end gap-[2px]">
-                  <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "8px" }} />
-                  <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "14px", animationDelay: "0.15s" }} />
-                  <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "10px", animationDelay: "0.3s" }} />
-                  <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "6px", animationDelay: "0.45s" }} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right: Candidate Camera Panel */}
-        <div className="flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden relative"
-          style={{
-            background: "rgba(0,0,0,0.4)",
-            border: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
-          {/* Camera feed */}
-          <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-black/60">
-            {cameraOn ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-                style={{ transform: "scaleX(-1)" }}
               />
-            ) : (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
-                  <VideoOff size={24} className="text-slate-500" />
-                </div>
-                <p className="text-xs text-slate-500">Camera is off</p>
-                <button
-                  onClick={startCamera}
-                  className="text-xs px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors"
-                >
-                  Turn On Camera
-                </button>
-              </div>
-            )}
-
-            {/* Recording indicator overlay */}
-            {isRecording && (
-              <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-[11px] text-red-300 font-medium">REC {recordingTime}s</span>
-              </div>
-            )}
-          </div>
-
-          {/* Candidate label bar */}
-          <div className="shrink-0 px-4 py-2.5 flex items-center justify-between"
-            style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
-          >
-            <div className="flex items-center gap-2">
-              <User size={14} className="text-blue-400" />
-              <span className="text-xs font-medium text-slate-200">You (Candidate)</span>
-            </div>
-            {cameraOn && (
-              <button
-                onClick={stopCamera}
-                className="text-[10px] px-2 py-1 bg-slate-700/60 hover:bg-slate-600/60 rounded text-slate-300 transition-colors"
+              <motion.div
+                animate={(loading || isSpeaking) ? { scale: [1, 1.03, 1] } : { scale: 1 }}
+                transition={(loading || isSpeaking) ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : {}}
+                className="relative z-10"
               >
-                Turn Off
-              </button>
-            )}
+                <div
+                  className="w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden"
+                  style={{
+                    border: (loading || isSpeaking) ? "3px solid rgba(99,102,241,0.6)" : "3px solid rgba(255,255,255,0.1)",
+                    boxShadow: (loading || isSpeaking) ? "0 0 30px rgba(99,102,241,0.3)" : "0 0 20px rgba(0,0,0,0.3)",
+                    transition: "border-color 0.3s, box-shadow 0.3s",
+                  }}
+                >
+                  <img
+                    src="/ai-recruiter.png"
+                    alt="AI Recruiter"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </motion.div>
+            </div>
+
+            {/* AI label bar */}
+            <div className="shrink-0 px-4 py-2.5 flex items-center justify-between"
+              style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+            >
+              <div className="flex items-center gap-2">
+                <Bot size={14} className="text-indigo-400" />
+                <span className="text-xs font-medium text-slate-200">Alex (Interviewer)</span>
+              </div>
+              {isThinking && (
+                <span className="text-[10px] text-amber-300 italic animate-pulse">Reviewing your answer...</span>
+              )}
+              {!isThinking && (loading || isSpeaking) && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-indigo-300">Speaking</span>
+                  <div className="flex items-end gap-[2px]">
+                    <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "8px" }} />
+                    <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "14px", animationDelay: "0.15s" }} />
+                    <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "10px", animationDelay: "0.3s" }} />
+                    <div className="w-[3px] bg-indigo-400 rounded-full animate-pulse" style={{ height: "6px", animationDelay: "0.45s" }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Candidate Camera Panel */}
+          <div className="flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden relative"
+            style={{
+              background: "rgba(0,0,0,0.4)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            {/* Camera feed */}
+            <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-black/60">
+              {cameraOn ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                  style={{ transform: "scaleX(-1)" }}
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                    <VideoOff size={24} className="text-slate-500" />
+                  </div>
+                  <p className="text-xs text-slate-500">Camera is off</p>
+                  <button
+                    onClick={startCamera}
+                    className="text-xs px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors"
+                  >
+                    Turn On Camera
+                  </button>
+                </div>
+              )}
+
+              {/* Recording indicator overlay */}
+              {isRecording && (
+                <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[11px] text-red-300 font-medium">REC {recordingTime}s</span>
+                </div>
+              )}
+            </div>
+
+            {/* Candidate label bar */}
+            <div className="shrink-0 px-4 py-2.5 flex items-center justify-between"
+              style={{ background: "rgba(0,0,0,0.3)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+            >
+              <div className="flex items-center gap-2">
+                <User size={14} className="text-blue-400" />
+                <span className="text-xs font-medium text-slate-200">You (Candidate)</span>
+              </div>
+              {cameraOn && (
+                <button
+                  onClick={stopCamera}
+                  className="text-[10px] px-2 py-1 bg-slate-700/60 hover:bg-slate-600/60 rounded text-slate-300 transition-colors"
+                >
+                  Turn Off
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Chat Messages + Controls */}
-      <div className="shrink-0 flex flex-col" style={{ maxHeight: "45%", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        {/* Chat Messages + Controls */}
+        <div className="shrink-0 flex flex-col" style={{ maxHeight: "45%", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
 
-        {/* Messages scroll area */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0" style={{ maxHeight: "240px" }}>
-          <ChatMessageList messages={messages} isThinking={isThinking} loading={loading} />
-        </div>
+          {/* Messages scroll area */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0" style={{ maxHeight: "240px" }}>
+            <ChatMessageList messages={messages} isThinking={isThinking} loading={loading} />
+          </div>
 
-        {/* Bottom Controls Bar */}
-        <div
-          className="shrink-0 px-4 py-3 flex items-center gap-2"
-          style={{ background: "rgba(15,23,42,0.9)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
-        >
-          {/* Video controls */}
-          {isVideoPhase && cameraOn && (
-            <div className="flex items-center gap-1.5 mr-1">
-              {!isRecording ? (
+          {/* Bottom Controls Bar */}
+          <div
+            className="shrink-0 px-4 py-3 flex items-center gap-2"
+            style={{ background: "rgba(15,23,42,0.9)", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            {/* Video controls */}
+            {isVideoPhase && cameraOn && (
+              <div className="flex items-center gap-1.5 mr-1">
+                {!isRecording ? (
+                  <button
+                    onClick={startRecording}
+                    disabled={loading}
+                    className="p-2 rounded-full bg-green-600 hover:bg-green-700 disabled:bg-slate-700 text-white transition-colors"
+                    title="Start Recording"
+                  >
+                    <Video size={16} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={stopRecording}
+                    className="p-2 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors animate-pulse"
+                    title="Stop Recording"
+                  >
+                    <Mic size={16} />
+                  </button>
+                )}
+                {pendingBlob && !isRecording && (
+                  <>
+                    <button
+                      onClick={acceptRecording}
+                      disabled={uploadingVideo}
+                      className="p-2 rounded-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-700 text-white transition-colors"
+                      title="Save Video"
+                    >
+                      <CheckCircle size={16} />
+                    </button>
+                    <button
+                      onClick={discardRecording}
+                      disabled={uploadingVideo}
+                      className="p-2 rounded-full bg-slate-700 hover:bg-slate-600 text-white transition-colors"
+                      title="Discard"
+                    >
+                      <VideoOff size={16} />
+                    </button>
+                  </>
+                )}
+                {uploadingVideo && <span className="text-[10px] text-indigo-300">Saving...</span>}
+                {videoUploadError && <span className="text-[10px] text-red-300">{videoUploadError}</span>}
+              </div>
+            )}
+
+            {/* Answer timer ring (compact, in controls bar) */}
+            {isAnswerTimerActive && (
+              <div className="shrink-0">
+                <svg width="28" height="28" viewBox="0 0 28 28">
+                  <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+                  <circle cx="14" cy="14" r="11" fill="none"
+                    stroke={answerTimeLeft <= 15 ? "#ef4444" : "#6366f1"}
+                    strokeWidth="2.5" strokeLinecap="round"
+                    strokeDasharray={`${answerTimerProgress * 69.12} 69.12`}
+                    transform="rotate(-90 14 14)"
+                    style={{ transition: "stroke-dasharray 1s linear" }}
+                  />
+                  <text x="14" y="14" textAnchor="middle" dominantBaseline="central"
+                    className={`text-[7px] font-bold ${answerTimeLeft <= 15 ? "fill-red-400" : "fill-white"}`}
+                  >{answerTimeLeft}</text>
+                </svg>
+              </div>
+            )}
+
+            {/* Voice-first mic button OR text input */}
+            {micMode && !isMicListening ? (
+              <div className="flex-1 flex items-center justify-center gap-3">
                 <button
-                  onClick={startRecording}
+                  onClick={startMicListening}
                   disabled={loading}
-                  className="p-2 rounded-full bg-green-600 hover:bg-green-700 disabled:bg-slate-700 text-white transition-colors"
-                  title="Start Recording"
+                  className="p-4 rounded-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-700 text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/20"
+                  title="Click to speak"
                 >
-                  <Video size={16} />
+                  <Mic size={22} />
                 </button>
-              ) : (
                 <button
-                  onClick={stopRecording}
-                  className="p-2 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors animate-pulse"
-                  title="Stop Recording"
+                  onClick={() => setMicMode(false)}
+                  className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors underline"
+                >
+                  Type instead
+                </button>
+              </div>
+            ) : micMode && isMicListening ? (
+              <div className="flex-1 flex items-center gap-3">
+                {/* Listening waveform */}
+                <button
+                  onClick={() => {
+                    const answer = micTranscriptRef.current.trim() || input.trim();
+                    stopMicListening();
+                    if (answer) {
+                      setInput("");
+                      micTranscriptRef.current = "";
+                      const hasVideo = isVideoSavedForAnswer;
+                      setIsVideoSavedForAnswer(false);
+                      handleSendMessage(answer, false, hasVideo, true);
+                    }
+                  }}
+                  className="p-3 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all animate-pulse shadow-lg shadow-red-500/20"
+                  title="Stop & Submit"
+                >
+                  <MicOff size={18} />
+                </button>
+                <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-red-500/30 rounded-full">
+                  {/* Mini waveform */}
+                  <div className="flex items-end gap-[2px]">
+                    {[8, 14, 10, 16, 8, 12, 6].map((h, i) => (
+                      <div key={i} className="w-[2px] bg-red-400 rounded-full animate-pulse" style={{ height: `${h}px`, animationDelay: `${i * 0.1}s` }} />
+                    ))}
+                  </div>
+                  <p className="text-xs text-slate-300 truncate flex-1">{input || "Listening..."}</p>
+                </div>
+              </div>
+            ) : (
+              /* Text input mode */
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const answer = (transcriptDraft || input).trim();
+                  if (!answer) return;
+                  const hasVideo = isVideoSavedForAnswer;
+                  setInput("");
+                  setTranscriptDraft("");
+                  setIsVideoSavedForAnswer(false);
+                  handleSendMessage(answer, false, hasVideo);
+                }}
+                className="flex-1 relative flex items-center gap-2"
+              >
+                <button
+                  type="button"
+                  onClick={() => setMicMode(true)}
+                  className="p-2 rounded-full bg-slate-800/60 hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors"
+                  title="Switch to voice"
                 >
                   <Mic size={16} />
                 </button>
-              )}
-              {pendingBlob && !isRecording && (
-                <>
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={transcriptDraft || input}
+                    onChange={(e) => {
+                      setTranscriptDraft("");
+                      setInput(e.target.value);
+                    }}
+                    disabled={loading}
+                    placeholder="Type your answer..."
+                    className="w-full bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-full pl-4 pr-11 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all disabled:opacity-40"
+                  />
                   <button
-                    onClick={acceptRecording}
-                    disabled={uploadingVideo}
-                    className="p-2 rounded-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-700 text-white transition-colors"
-                    title="Save Video"
+                    type="submit"
+                    disabled={!(transcriptDraft || input).trim() || loading}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-700 text-white rounded-full transition-colors"
                   >
-                    <CheckCircle size={16} />
+                    <Send size={14} className="ml-0.5" />
                   </button>
-                  <button
-                    onClick={discardRecording}
-                    disabled={uploadingVideo}
-                    className="p-2 rounded-full bg-slate-700 hover:bg-slate-600 text-white transition-colors"
-                    title="Discard"
-                  >
-                    <VideoOff size={16} />
-                  </button>
-                </>
-              )}
-              {uploadingVideo && <span className="text-[10px] text-indigo-300">Saving...</span>}
-              {videoUploadError && <span className="text-[10px] text-red-300">{videoUploadError}</span>}
-            </div>
-          )}
-
-          {/* Answer timer ring (compact, in controls bar) */}
-          {isAnswerTimerActive && (
-            <div className="shrink-0">
-              <svg width="28" height="28" viewBox="0 0 28 28">
-                <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
-                <circle cx="14" cy="14" r="11" fill="none"
-                  stroke={answerTimeLeft <= 15 ? "#ef4444" : "#6366f1"}
-                  strokeWidth="2.5" strokeLinecap="round"
-                  strokeDasharray={`${answerTimerProgress * 69.12} 69.12`}
-                  transform="rotate(-90 14 14)"
-                  style={{ transition: "stroke-dasharray 1s linear" }}
-                />
-                <text x="14" y="14" textAnchor="middle" dominantBaseline="central"
-                  className={`text-[7px] font-bold ${answerTimeLeft <= 15 ? "fill-red-400" : "fill-white"}`}
-                >{answerTimeLeft}</text>
-              </svg>
-            </div>
-          )}
-
-          {/* Voice-first mic button OR text input */}
-          {micMode && !isMicListening ? (
-            <div className="flex-1 flex items-center justify-center gap-3">
-              <button
-                onClick={startMicListening}
-                disabled={loading}
-                className="p-4 rounded-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-700 text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/20"
-                title="Click to speak"
-              >
-                <Mic size={22} />
-              </button>
-              <button
-                onClick={() => setMicMode(false)}
-                className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors underline"
-              >
-                Type instead
-              </button>
-            </div>
-          ) : micMode && isMicListening ? (
-            <div className="flex-1 flex items-center gap-3">
-              {/* Listening waveform */}
-              <button
-                onClick={() => {
-                  const answer = micTranscriptRef.current.trim() || input.trim();
-                  stopMicListening();
-                  if (answer) {
-                    setInput("");
-                    micTranscriptRef.current = "";
-                    const hasVideo = isVideoSavedForAnswer;
-                    setIsVideoSavedForAnswer(false);
-                    handleSendMessage(answer, false, hasVideo, true);
-                  }
-                }}
-                className="p-3 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all animate-pulse shadow-lg shadow-red-500/20"
-                title="Stop & Submit"
-              >
-                <MicOff size={18} />
-              </button>
-              <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-red-500/30 rounded-full">
-                {/* Mini waveform */}
-                <div className="flex items-end gap-[2px]">
-                  {[8, 14, 10, 16, 8, 12, 6].map((h, i) => (
-                    <div key={i} className="w-[2px] bg-red-400 rounded-full animate-pulse" style={{ height: `${h}px`, animationDelay: `${i * 0.1}s` }} />
-                  ))}
                 </div>
-                <p className="text-xs text-slate-300 truncate flex-1">{input || "Listening..."}</p>
-              </div>
-            </div>
-          ) : (
-            /* Text input mode */
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const answer = (transcriptDraft || input).trim();
-                if (!answer) return;
-                const hasVideo = isVideoSavedForAnswer;
-                setInput("");
-                setTranscriptDraft("");
-                setIsVideoSavedForAnswer(false);
-                handleSendMessage(answer, false, hasVideo);
-              }}
-              className="flex-1 relative flex items-center gap-2"
-            >
-              <button
-                type="button"
-                onClick={() => setMicMode(true)}
-                className="p-2 rounded-full bg-slate-800/60 hover:bg-slate-700/60 text-slate-400 hover:text-white transition-colors"
-                title="Switch to voice"
-              >
-                <Mic size={16} />
-              </button>
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={transcriptDraft || input}
-                  onChange={(e) => {
-                    setTranscriptDraft("");
-                    setInput(e.target.value);
-                  }}
-                  disabled={loading}
-                  placeholder="Type your answer..."
-                  className="w-full bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-full pl-4 pr-11 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all disabled:opacity-40"
-                />
-                <button
-                  type="submit"
-                  disabled={!(transcriptDraft || input).trim() || loading}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-700 text-white rounded-full transition-colors"
-                >
-                  <Send size={14} className="ml-0.5" />
-                </button>
-              </div>
-            </form>
-          )}
+              </form>
+            )}
+          </div>
         </div>
-      </div>
 
       </div>{/* end main content */}
     </div>
